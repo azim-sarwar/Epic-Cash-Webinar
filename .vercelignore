@@ -1,0 +1,4 @@
+# Files that are kept in the project but must not be put on the public website
+.claude
+email-service
+README.md

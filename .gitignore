@@ -1,0 +1,10 @@
+# Local preview settings (not part of the website)
+.claude/
+
+# Vercel's local working folder, if the Vercel tool is ever used on this computer
+.vercel/
+
+# Computer clutter
+.DS_Store
+Thumbs.db
+desktop.ini

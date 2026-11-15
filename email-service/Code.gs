@@ -25,7 +25,8 @@ const CONFIG = {
 
 const TZ = 'America/New_York';
 const TITLE = 'Epic Cash Monthly Webinar';
-const HOSTS = 'Max Freeman, founder of Epic Cash, with Romain Daniellou or Enrique Jose';
+const START_HOUR = 10; // 10 = 10:00 AM New York time (24-hour clock). Keep the same as START_HOUR in index.html
+const HOSTS = 'Romain Daniellou and Jose Enrique Castellón, with Max Freeman, founder of Epic Cash, as guest';
 
 /** The webinar page calls this with { "email": "..." }. */
 function doPost(e) {
@@ -108,14 +109,14 @@ function getSheet_() {
   return sheet;
 }
 
-/** First Tuesday of a month at 2:00 PM New York time, as an exact moment (handles summer/winter clocks). */
+/** First Tuesday of a month at the start hour, New York time, as an exact moment (handles summer/winter clocks). */
 function sessionFor_(year, month) {
   const first = new Date(Date.UTC(year, month, 1));
   const y = first.getUTCFullYear(), m = first.getUTCMonth();
   const day = 1 + ((2 - first.getUTCDay() + 7) % 7);
-  let t = Date.UTC(y, m, day, 19, 0, 0);
+  let t = Date.UTC(y, m, day, START_HOUR + 5, 0, 0);
   const hour = Number(Utilities.formatDate(new Date(t), TZ, 'H'));
-  t -= (hour - 14) * 3600000;
+  t -= (hour - START_HOUR) * 3600000;
   return { start: new Date(t), end: new Date(t + CONFIG.DURATION_MIN * 60000), y: y, m: m, day: day };
 }
 
@@ -143,7 +144,7 @@ function joinLine_() {
 function buildIcs_(next, now) {
   const rule = 'RRULE:FREQ=MONTHLY;BYDAY=1TU;COUNT=' + CONFIG.SESSIONS;
   const local = function (h, min) { return '' + next.y + pad_(next.m + 1) + pad_(next.day) + 'T' + pad_(h) + pad_(min) + '00'; };
-  const endH = 14 + Math.floor(CONFIG.DURATION_MIN / 60), endM = CONFIG.DURATION_MIN % 60;
+  const endH = START_HOUR + Math.floor(CONFIG.DURATION_MIN / 60), endM = CONFIG.DURATION_MIN % 60;
   const desc = 'One-hour monthly live update on Epic Cash, hosted by ' + HOSTS +
     ': development, network and mining, ecosystem, live Q&A. ' + joinLine_();
   return [
@@ -154,8 +155,9 @@ function buildIcs_(next, now) {
     'END:VTIMEZONE',
     'BEGIN:VEVENT',
     'UID:epic-cash-monthly-update@webinar',
+    'SEQUENCE:1', // version of the invite: raised when the time moved to 10:00 AM, so calendars that already hold it update it
     'DTSTAMP:' + utcStamp_(now),
-    'DTSTART;TZID=' + TZ + ':' + local(14, 0),
+    'DTSTART;TZID=' + TZ + ':' + local(START_HOUR, 0),
     'DTEND;TZID=' + TZ + ':' + local(endH, endM),
     rule,
     'SUMMARY:' + icsText_(TITLE),

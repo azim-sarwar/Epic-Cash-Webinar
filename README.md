@@ -1,7 +1,7 @@
 # Epic Cash Monthly Webinar: landing page
 
 A one-page website for the Epic Cash Monthly Webinar, held on the first Tuesday of every month at
-2:00 PM New York time, for one hour. Visitors can add a year of sessions to their calendar and
+10:00 AM New York time, for one hour. Visitors can add a year of sessions to their calendar and
 subscribe by email to receive the invite.
 
 It is a plain website: one HTML file plus images. There is nothing to install or build.
@@ -11,7 +11,7 @@ It is a plain website: one HTML file plus images. There is nothing to install or
 | File or folder | What it is | Goes on the website? |
 | --- | --- | --- |
 | `index.html` | The whole page: content, design, animations and behaviour | Yes |
-| `assets/` | The logo, coin and three host photos | Yes |
+| `assets/` | The logo, coin and the photos of the guest and two hosts | Yes |
 | `vercel.json` | Safety and speed settings that Vercel applies when serving the page | Yes (read by Vercel) |
 | `.vercelignore` | Tells Vercel which files not to put on the website | Read by Vercel |
 | `.gitignore` | Tells GitHub tools which files to leave out | Read by Git |
@@ -93,11 +93,12 @@ Protection built in:
 - **Unsubscribes:** the email asks people to reply "unsubscribe". Someone then deletes that row from the Sheet by hand.
 - **Sending limits:** Google allows roughly 1,500 emails a day on a Workspace account and 100 on a free Gmail account.
 - **After a year:** each invite covers 12 sessions from the date it was sent, then ends. Subscribers would need a new invite after that.
-- **Changing hosts or wording:** edit `index.html`. Host names also appear in the calendar entry (`desc` near the bottom of `index.html`) and in `HOSTS` at the top of the Google script.
+- **Changing the start time:** change `START_HOUR` in both `index.html` and the Google script (24-hour clock, New York time), and the "10:00 AM" wording in `index.html`. Then re-publish the script.
+- **Changing the guest, hosts or wording:** edit `index.html`. Their names also appear in the calendar entry (`desc` near the bottom of `index.html`) and in `HOSTS` at the top of the Google script.
 - **Changing photos or the logo:** replace the file in `assets/` with one of the same name. Host photos are square, 360 by 360 pixels.
 
 ## Still to decide
 - Where the webinar is held, and so the join link (`JOIN_URL` in both places).
 - Whether the invite emails should come from an Epic Cash address. If so, the script must be published again from that Google account, and `SIGNUP_ENDPOINT` in `index.html` updated to the new web address.
-- Whether "2:00 PM EST" means New York time all year (how the page works now) or fixed winter time.
+- Whether "10 AM EST" means New York time all year (how the page works now) or fixed winter time.
 - Confirmation from the hosts of the four agenda topics and of the wording about Max Freeman.

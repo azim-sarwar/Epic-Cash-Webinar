@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Epic Cash Monthly Webinar | Live on the first Tuesday of every month</title>
-<meta name="description" content="A one-hour live online session with the latest Epic Cash (EPIC) updates, hosted by founder Max Freeman. First Tuesday of every month at 2:00 PM Eastern (New York time). Add the year's sessions to your calendar.">
+<meta name="description" content="A one-hour live online session with the latest Epic Cash (EPIC) updates, with founder Max Freeman as the guest. First Tuesday of every month at 10:00 AM Eastern (New York time). Add the year's sessions to your calendar.">
 <meta name="theme-color" content="#050505">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- Security: the page loads nothing from other websites. If you connect the email form, connect-src allows the secure (https) address it sends to. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src https:; base-uri 'none'; form-action 'none'">
 <meta property="og:title" content="Epic Cash Monthly Webinar">
-<meta property="og:description" content="Live online, first Tuesday of every month at 2:00 PM Eastern. Development news, network and mining, community Q&amp;A.">
+<meta property="og:description" content="Live online, first Tuesday of every month at 10:00 AM Eastern. Development news, network and mining, community Q&amp;A.">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/png" href="assets/epic-coin.png">
 <style>
@@ -155,7 +155,35 @@ section{padding:72px 0}
 .host b{color:var(--text)}
 .cohosts{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px}
 .cohosts li{display:flex;align-items:center;gap:14px;font-size:1.05rem}
-.cohosts .or{color:var(--muted);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;padding-left:18px}
+.cohosts{gap:16px}
+
+/* The guest's book: a small 3D book built from four flat faces (front, page edge, spine, back).
+   It turns slowly, a band of light crosses the cover, and it swings open-side-forward under the mouse. */
+.book-row{display:flex;align-items:center;gap:26px;margin-top:22px;padding:20px 22px;border-radius:14px;text-decoration:none;color:var(--text);
+  border:1px solid var(--line);background:linear-gradient(120deg,rgba(246,212,113,.08),rgba(246,212,113,0) 60%);transition:border-color .25s,transform .25s}
+.book-row:hover{border-color:var(--gold-deep);color:var(--text);transform:translateY(-2px)}
+.book-stage{flex:none;width:124px;height:168px;perspective:800px}
+.book{--bw:112px;--bh:158px;--bd:18px;position:relative;display:block;width:var(--bw);height:var(--bh);margin:4px;transform-style:preserve-3d;
+  transform:rotateY(-30deg) rotateX(4deg);animation:book-turn 7s ease-in-out infinite;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.book-row:hover .book{animation:none;transform:rotateY(22deg) rotateX(2deg) translateY(-4px)}
+@keyframes book-turn{0%,100%{transform:rotateY(-34deg) rotateX(4deg) translateY(0)}50%{transform:rotateY(-14deg) rotateX(2deg) translateY(-5px)}}
+.book-face{position:absolute;display:block}
+.book-front,.book-back{inset:0;border-radius:2px 5px 5px 2px}
+.book-front{transform:translateZ(calc(var(--bd) / 2));overflow:hidden;background:#0b0a08}
+.book-front img{display:block;width:100%;height:100%;object-fit:cover} /* the real cover, same proportions as the book (1061 by 1500) */
+.book-front::before{content:"";position:absolute;inset:0;z-index:1;box-shadow:inset 6px 0 8px -3px rgba(0,0,0,.65),inset 0 0 0 1px rgba(246,212,113,.25);pointer-events:none} /* soft shadow where the cover meets the spine */
+.book-front::after{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);transform:translateX(-140%) skewX(-18deg);animation:sweep 4.5s ease 1s infinite}
+.book-back{transform:translateZ(calc(var(--bd) / -2));background:#0b0a08;border:1px solid #3a321c;box-shadow:0 18px 30px rgba(0,0,0,.6)}
+.book-spine{top:0;bottom:0;left:0;width:var(--bd);transform:translateX(calc(var(--bd) / -2)) rotateY(-90deg);background:linear-gradient(90deg,#c98a3e,#f6d471 45%,#c98a3e)}
+.book-pages{top:3px;bottom:3px;right:0;width:calc(var(--bd) - 2px);transform:translateX(calc(var(--bd) / 2 - 1px)) rotateY(90deg);
+  background:repeating-linear-gradient(90deg,#efe9da 0 1px,#cfc8b6 1px 2px)}
+.book-copy{display:grid;gap:4px;min-width:0}
+.book-copy .role{color:var(--gold);font-weight:700;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
+.book-copy strong{font-size:1.12rem;line-height:1.3}
+.book-series{color:var(--muted);font-size:.92rem}
+.book-link{color:var(--gold);font-weight:700;margin-top:4px}
+.book-link span{display:inline-block;transition:transform .25s}
+.book-row:hover .book-link span{transform:translateX(5px)}
 
 /* Form */
 form{display:grid;gap:12px}
@@ -312,6 +340,7 @@ summary::after{transition:transform .25s}
   .grid-4,.facts{grid-template-columns:1fr}
   .cta-row .btn{width:100%}
   .host{flex-direction:column;gap:16px}
+  .book-row{gap:18px;padding:16px}
   .avatar{width:104px;height:104px}
   .brand span small{display:none}
   .bar{gap:10px}
@@ -344,7 +373,7 @@ summary::after{transition:transform .25s}
     </a>
     <nav class="nav" id="nav" aria-label="Sections">
       <a href="#agenda">What's covered</a>
-      <a href="#hosts">Hosts</a>
+      <a href="#hosts">Guest &amp; hosts</a>
       <a href="#about">About Epic Cash</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -364,12 +393,12 @@ summary::after{transition:transform .25s}
     <div>
       <span class="eyebrow">Live online &middot; every month</span>
       <h1>The <span class="gold">Epic Cash</span> Monthly Webinar</h1>
-      <p class="lede">One live hour a month with Epic Cash founder Max Freeman, covering what changed: development progress, the network and mining, the wider ecosystem, and your questions answered live.</p>
+      <p class="lede">One live hour a month with Epic Cash founder Max Freeman as the guest, covering what changed: development progress, the network and mining, the wider ecosystem, and your questions answered live.</p>
       <ul class="when" aria-label="Schedule">
         <li><b>When</b> &nbsp;First Tuesday of every month</li>
-        <li><b>Time</b> &nbsp;2:00 PM Eastern (New York)</li>
+        <li><b>Time</b> &nbsp;10:00 AM Eastern (New York)</li>
         <li><b>Length</b> &nbsp;1 hour</li>
-        <li><b>Host</b> &nbsp;Max Freeman, founder</li>
+        <li><b>Guest</b> &nbsp;Max Freeman, founder</li>
         <li><b>Where</b> &nbsp;Online</li>
       </ul>
       <div class="cta-row">
@@ -382,7 +411,7 @@ summary::after{transition:transform .25s}
       <div class="coin" aria-hidden="true"><img src="assets/epic-coin.png" alt="" width="623" height="609"></div>
       <div class="label"><span class="dot" aria-hidden="true"></span><span id="nextLabel">Next session</span></div>
       <p class="next-date" id="nextDate">First Tuesday of the month</p>
-      <p class="muted" id="nextEt" style="margin:0">2:00 PM Eastern (New York time)</p>
+      <p class="muted" id="nextEt" style="margin:0">10:00 AM Eastern (New York time)</p>
       <p class="small" id="nextLocal" style="margin:.4em 0 0;color:var(--gold)"></p>
       <div class="count" id="count" role="timer" aria-label="Time until the next session" hidden>
         <div><b id="cd">0</b><span>Days</span></div>
@@ -398,8 +427,8 @@ summary::after{transition:transform .25s}
 
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
-    <ul><li>First Tuesday of every month</li><li>2:00 PM Eastern</li><li>1 hour</li><li>Hosted by founder Max Freeman</li><li>Live online</li><li>Development news</li><li>Network and mining</li><li>Ecosystem</li><li>Live Q&amp;A</li><li>Newcomers welcome</li></ul>
-    <ul><li>First Tuesday of every month</li><li>2:00 PM Eastern</li><li>1 hour</li><li>Hosted by founder Max Freeman</li><li>Live online</li><li>Development news</li><li>Network and mining</li><li>Ecosystem</li><li>Live Q&amp;A</li><li>Newcomers welcome</li></ul>
+    <ul><li>First Tuesday of every month</li><li>10:00 AM Eastern</li><li>1 hour</li><li>Guest: founder Max Freeman</li><li>Live online</li><li>Development news</li><li>Network and mining</li><li>Ecosystem</li><li>Live Q&amp;A</li><li>Newcomers welcome</li></ul>
+    <ul><li>First Tuesday of every month</li><li>10:00 AM Eastern</li><li>1 hour</li><li>Guest: founder Max Freeman</li><li>Live online</li><li>Development news</li><li>Network and mining</li><li>Ecosystem</li><li>Live Q&amp;A</li><li>Newcomers welcome</li></ul>
   </div>
 </div>
 
@@ -438,27 +467,45 @@ summary::after{transition:transform .25s}
 <section id="hosts">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">Your hosts</span>
+      <span class="eyebrow">Guest and hosts</span>
       <h2>Hear it from the founder</h2>
-      <p class="muted">Every session is led by Max Freeman, with a co-host alongside him for the full hour.</p>
+      <p class="muted">Max Freeman, the founder of Epic Cash, joins every session as the guest. Romain Daniellou and Jose Enrique Castellón host the hour.</p>
     </div>
     <div class="hosts">
-      <article class="card host">
-        <img class="avatar" src="assets/host-max-freeman.jpg" alt="" width="360" height="360" loading="lazy" decoding="async">
-        <div>
-          <h3>Max Freeman</h3>
-          <p class="role">Founder of Epic Cash &middot; Host</p>
-          <p>Max founded Epic Cash and led the work behind its launch in September 2019, which started from zero coins with no pre-mine and no ICO.</p>
-          <p>His name is a statement of the project's purpose: <b>Max</b>imum <b>Free</b>dom for <b>Man</b>kind. He also writes about Epic Cash on the <a href="https://maxfreeman4.substack.com/" target="_blank" rel="noopener noreferrer">Epicenter DAO Blog</a>.</p>
+      <article class="card guest">
+        <div class="host">
+          <img class="avatar" src="assets/host-max-freeman.jpg" alt="" width="360" height="360" loading="lazy" decoding="async">
+          <div>
+            <h3>Max Freeman</h3>
+            <p class="role">Guest &middot; Founder of Epic Cash</p>
+            <p>Max founded Epic Cash and led the work behind its launch in September 2019, which started from zero coins with no pre-mine and no ICO.</p>
+            <p>His name is a statement of the project's purpose: <b>Max</b>imum <b>Free</b>dom for <b>Man</b>kind.</p>
+          </div>
         </div>
+        <!-- The book, with its real cover on the front face -->
+        <a class="book-row" href="https://www.amazon.com/dp/B0FRW575DM" target="_blank" rel="noopener noreferrer">
+          <span class="book-stage" aria-hidden="true">
+            <span class="book">
+              <span class="book-face book-front"><img src="assets/book-cover.webp" alt="" width="1061" height="1500" loading="lazy" decoding="async"></span>
+              <span class="book-face book-pages"></span>
+              <span class="book-face book-spine"></span>
+              <span class="book-face book-back"></span>
+            </span>
+          </span>
+          <span class="book-copy">
+            <span class="role">The book by Max Freeman</span>
+            <strong>Bitcoin's Purpose Restored: In Epic Cash</strong>
+            <span class="book-series">Quest for Superior Money, Book 1</span>
+            <span class="book-link">View it on Amazon <span aria-hidden="true">&rarr;</span></span>
+          </span>
+        </a>
       </article>
       <article class="card">
-        <h3>Joined each month by</h3>
-        <p class="role">Co-host</p>
+        <h3>Your hosts</h3>
+        <p class="role">Hosting every session</p>
         <ul class="cohosts">
           <li><img class="avatar sm" src="assets/host-romain-daniellou.jpg" alt="" width="360" height="360" loading="lazy" decoding="async"><b>Romain Daniellou</b></li>
-          <li class="or" aria-hidden="true">or</li>
-          <li><img class="avatar sm" src="assets/host-enrique-jose.jpg" alt="" width="360" height="360" loading="lazy" decoding="async"><b>Enrique Jose</b></li>
+          <li><img class="avatar sm" src="assets/host-enrique-jose.jpg" alt="" width="360" height="360" loading="lazy" decoding="async"><b>Jose Enrique Castellón</b></li>
         </ul>
       </article>
     </div>
@@ -478,7 +525,7 @@ summary::after{transition:transform .25s}
       <p class="small muted" style="margin:-20px 0 30px">The first button downloads a calendar file. Open it and your calendar app adds all 12 sessions.</p>
       <h3>Upcoming dates</h3>
       <ul class="dates" id="dates">
-        <li><span>First Tuesday of every month</span><span class="muted">2:00 PM Eastern</span></li>
+        <li><span>First Tuesday of every month</span><span class="muted">10:00 AM Eastern</span></li>
       </ul>
     </div>
 
@@ -520,8 +567,8 @@ summary::after{transition:transform .25s}
       <h2>Three steps, two minutes</h2>
       <ol class="steps">
         <li><h3>Save the date</h3><p>Add the year's sessions to your calendar in one click, or subscribe by email.</p></li>
-        <li><h3>Join online</h3><p>Open the join link on this page at 2:00 PM Eastern on the first Tuesday.</p></li>
-        <li><h3>Ask your questions</h3><p>Listen to the month's updates, then put your questions to Max and his co-host.</p></li>
+        <li><h3>Join online</h3><p>Open the join link on this page at 10:00 AM Eastern on the first Tuesday.</p></li>
+        <li><h3>Ask your questions</h3><p>Listen to the month's updates, then put your questions to Max and the hosts.</p></li>
       </ol>
     </div>
     <div id="faq">
@@ -529,11 +576,11 @@ summary::after{transition:transform .25s}
       <h2>Good to know</h2>
       <details>
         <summary>What time is that where I live?</summary>
-        <p>The session starts at 2:00 PM in New York. <span id="faqLocal">The "Next session" box at the top of this page shows it in your own time zone.</span></p>
+        <p>The session starts at 10:00 AM in New York. <span id="faqLocal">The "Next session" box at the top of this page shows it in your own time zone.</span></p>
       </details>
       <details>
         <summary>How long is it, and who hosts it?</summary>
-        <p>Each session lasts one hour. It is hosted by Max Freeman, the founder of Epic Cash, joined by Romain Daniellou or Enrique Jose.</p>
+        <p>Each session lasts one hour. It is hosted by Romain Daniellou and Jose Enrique Castellón, with Max Freeman, the founder of Epic Cash, as the guest.</p>
       </details>
       <details>
         <summary>Do I need to register?</summary>
@@ -799,12 +846,12 @@ summary::after{transition:transform .25s}
   var SESSIONS = 12;          // How many monthly sessions the calendar invite covers (12 = a full year).
   /* ------------------------------------------------------ */
 
-  var TZ = 'America/New_York', START_HOUR = 14;
+  var TZ = 'America/New_York', START_HOUR = 10; // 10 = 10:00 AM New York time (24-hour clock)
   var TITLE = 'Epic Cash Monthly Webinar';
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? '0' : '') + n; };
 
-  // First Tuesday of a month at 2:00 PM New York time, as an exact moment (handles summer/winter clock changes).
+  // First Tuesday of a month at 10:00 AM New York time, as an exact moment (handles summer/winter clock changes).
   function session(y, m) {
     y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
     var dow = new Date(Date.UTC(y, m, 1)).getUTCDay();
@@ -878,7 +925,7 @@ summary::after{transition:transform .25s}
 
   // Calendar: repeating entry, first Tuesday monthly, pinned to New York time
   var RULE = 'RRULE:FREQ=MONTHLY;BYDAY=1TU;COUNT=' + SESSIONS; // first Tuesday of each month, for a year
-  var desc = 'One-hour monthly live update on Epic Cash, hosted by founder Max Freeman with Romain Daniellou or Enrique Jose: development, network and mining, ecosystem, live Q&A.' +
+  var desc = 'One-hour monthly live update on Epic Cash, hosted by Romain Daniellou and Jose Enrique Castellón, with Max Freeman, founder of Epic Cash, as guest: development, network and mining, ecosystem, live Q&A.' +
              (joinOk ? ' Join: ' + JOIN_URL : ' Join link: see the event page.');
   var utc = function (d) { return d.toISOString().replace(/[-:]|\.\d{3}/g, ''); };
   var localStamp = function (s, h, min) { return '' + s.y + pad(s.m + 1) + pad(s.day) + 'T' + pad(h) + pad(min) + '00'; };
@@ -902,6 +949,7 @@ summary::after{transition:transform .25s}
       'END:VTIMEZONE',
       'BEGIN:VEVENT',
       'UID:epic-cash-monthly-update@webinar',
+      'SEQUENCE:1', // version of the invite: raised when the time moved to 10:00 AM, so calendars that already hold it update it
       'DTSTAMP:' + utc(new Date()),
       'DTSTART;TZID=' + TZ + ':' + localStamp(next, START_HOUR, 0),
       'DTEND;TZID=' + TZ + ':' + localStamp(next, endH, endM),

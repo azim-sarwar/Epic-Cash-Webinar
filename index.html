@@ -22,6 +22,7 @@
   --radius:16px; --max:1120px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important} /* "hidden" must win over button and grid styles, in every browser */
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);
   font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
@@ -44,7 +45,7 @@ p{margin:0 0 1em}
 .small{font-size:.88rem}
 
 /* Header */
-header{position:sticky;top:0;z-index:5;background:rgba(5,5,5,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:5;background:rgba(5,5,5,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
 .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.02em}
 .brand{perspective:420px}
@@ -531,13 +532,14 @@ summary::after{transition:transform .25s}
 
     <div class="card">
       <h3>Subscribe and get the year's invite</h3>
-      <p>Any email address works: Gmail, Outlook, Yahoo or any other. We email you a calendar invite for the next 12 sessions, and it also downloads here straight away.</p>
+      <p>Any email address works: Gmail, Outlook, Yahoo or any other. We email you a calendar invite for the next 12 sessions, and you can add them here straight away too.</p>
       <form id="remind" novalidate>
         <label for="email">Email address</label>
-        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="254" required aria-describedby="formMsg">
+        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false"placeholder="you@example.com" maxlength="254" required aria-describedby="formMsg">
         <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <button class="btn btn-primary" type="submit">Subscribe and add to my calendar</button>
         <p class="msg" id="formMsg" role="status" aria-live="polite"></p>
+        <button class="btn btn-ghost" type="button" id="inviteBtn" hidden>Add the 12 sessions to my calendar</button>
         <p class="small muted" style="margin:0">Your email is used only for webinar reminders. You can unsubscribe from any email.</p>
       </form>
     </div>
@@ -978,36 +980,61 @@ summary::after{transition:transform .25s}
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254) {
       say('Please enter a valid email address.', 'err'); form.email.focus(); return;
     }
-    var got = 'Your invite for the next ' + SESSIONS + ' sessions has downloaded. Open it to add them to your calendar.';
-    // Download the invite at once, while the browser still counts this as the visitor's own click.
-    // (Browsers can block a download that starts a few seconds later, after the server has replied.)
-    downloadIcs();
+    var inviteBtn = $('inviteBtn');
+    inviteBtn.hidden = true;
     if (!/^https:\/\//i.test(SIGNUP_ENDPOINT)) {
-      say(got + ' (Preview only: the email list is not connected yet, so your address was not sent or saved.)', 'info'); return;
+      downloadIcs();
+      say('Your invite has downloaded. (Preview only: the email list is not connected yet, so your address was not sent or saved.)', 'info'); return;
     }
     busy = true; say('Sending…', 'info');
+    var body = JSON.stringify({ email: email }), settled = false, timer = 0;
+
+    // Shows the outcome once, then offers the calendar invite.
+    // The invite is offered only AFTER the sign-up has been dealt with: on iPhones a download prompt that opens
+    // while the sign-up is still on its way can cut it off, and the visitor then sees a failure that did not happen.
+    function finish(text, kind, offerInvite, clear) {
+      if (settled) return;
+      settled = true; busy = false; clearTimeout(timer);
+      if (clear) form.reset();
+      say(text, kind);
+      if (offerInvite) {
+        inviteBtn.hidden = false;                  // always a button to tap, on every device
+        try { downloadIcs(); } catch (err) {}      // and start the download by itself where the browser allows it
+      }
+    }
+    // Second route, used when the reply could not be read (some phone browsers and privacy blockers stop the page
+    // reading a reply from another site). It sends the sign-up again in a way that needs no reply. The script
+    // never emails the same address twice in 24 hours, so this cannot cause a duplicate.
+    function secondRoute() {
+      if (settled) return;
+      var queued = false;
+      try { queued = !!navigator.sendBeacon && navigator.sendBeacon(SIGNUP_ENDPOINT, new Blob([body], { type: 'text/plain;charset=utf-8' })); } catch (err) {}
+      if (queued) finish('Your sign-up was sent. The invite email should arrive within a few minutes (check your spam folder too). If it does not, please try once more.', 'ok', true, true);
+      else finish('That did not go through. Please check your connection and try again. You can still add the sessions with the button below.', 'err', true, false);
+    }
+    timer = setTimeout(secondRoute, 15000); // no answer after 15 seconds: do not leave the visitor waiting
+
     fetch(SIGNUP_ENDPOINT, {
       // Sent as plain text on purpose: the Google script accepts that from any website without an extra permission round-trip.
+      // keepalive lets the request finish even if the page is interrupted.
       method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ email: email }), credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'follow'
+      body: body, credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'follow', keepalive: true
     }).then(function (r) {
       if (!r.ok) throw new Error('bad status');
       return r.json();
     }).then(function (res) {
       if (res && res.ok) {
-        form.reset();
-        say(res.already
-          ? 'You are already subscribed, and your invite email was sent earlier (check your spam folder too). The invite has also downloaded here.'
-          : 'You are subscribed. An invite email is on its way (check your spam folder too), and the invite has also downloaded here.', 'ok');
+        finish(res.already
+          ? 'You are already subscribed, and your invite email was sent earlier (check your spam folder too).'
+          : 'You are subscribed. An invite email is on its way (check your spam folder too).', 'ok', true, true);
       } else if (res && res.error === 'email') {
-        say('Please enter a valid email address.', 'err');
+        finish('Please enter a valid email address.', 'err', false, false);
       } else if (res && res.error === 'busy') {
-        say('You are on the list, but invite emails have reached today’s limit. The invite has downloaded here instead; open it to add the sessions.', 'info');
+        finish('You are on the list, but invite emails have reached today’s limit. Add the sessions with the button below.', 'info', true, true);
       } else throw new Error('refused');
-    }).catch(function () {
-      say('That did not go through. Please try again, or use the calendar button instead.', 'err');
-    }).then(function () { busy = false; });
+    }).catch(secondRoute);
   });
+  $('inviteBtn').addEventListener('click', downloadIcs);
 })();
 </script>
 </body>

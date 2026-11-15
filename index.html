@@ -47,10 +47,16 @@ p{margin:0 0 1em}
 header{position:sticky;top:0;z-index:5;background:rgba(5,5,5,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
 .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.02em}
-.brand{perspective:300px}
+.brand{perspective:420px}
 /* the official emblem, exactly as supplied: it only moves (sways, and spins once on hover); it is never recoloured or reshaped */
-.brand .logo{height:44px;width:auto;flex:none;display:block;animation:logo-sway 5s ease-in-out infinite}
-.brand:hover .logo{animation:logo-spin .9s cubic-bezier(.3,.8,.3,1)}
+/* The one official logo file is shown through two side-by-side windows: the emblem (left 37%) and the lettering (the rest).
+   Nothing in the artwork is edited; this only lets the emblem move while the lettering stays still.
+   --lh is the logo height; its full width is 2.503 times that (the file is 2000 by 799). */
+.brand{gap:0;--lh:46px;--lw:calc(var(--lh) * 2.503)}
+.logo-mark,.logo-text{flex:none;display:block;height:var(--lh);background:url(assets/epic-cash-logo.webp) 0 0/var(--lw) var(--lh) no-repeat}
+.logo-mark{width:calc(var(--lw) * .37);transform-origin:43.8% 50%;animation:logo-sway 5s ease-in-out infinite}
+.logo-text{width:calc(var(--lw) * .63);background-position:calc(var(--lw) * -.37) 0}
+.brand:hover .logo-mark{animation:logo-spin .9s cubic-bezier(.3,.8,.3,1)}
 @keyframes logo-sway{0%,100%{transform:translateY(0) rotateY(-24deg)}50%{transform:translateY(-2px) rotateY(24deg)}}
 @keyframes logo-spin{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
 .word{display:block;line-height:1.1;white-space:nowrap}
@@ -310,7 +316,7 @@ summary::after{transition:transform .25s}
   .brand span small{display:none}
   .bar{gap:10px}
   .word b{font-size:1rem;letter-spacing:.12em}
-  .brand .logo{height:38px}
+  .brand{--lh:38px}
   .bar .btn-sm{padding:8px 13px;font-size:.86rem}
 }
 @media (prefers-reduced-motion:reduce){
@@ -334,8 +340,7 @@ summary::after{transition:transform .25s}
 <header>
   <div class="wrap bar">
     <a class="brand" href="#top" aria-label="Epic Cash Monthly Webinar, back to top">
-      <img class="logo" src="assets/epic-logo.png" alt="" width="329" height="375">
-      <span class="word"><b><i>EPIC</i> CASH</b><small>Monthly Webinar</small></span>
+      <span class="logo-mark" aria-hidden="true"></span><span class="logo-text" aria-hidden="true"></span>
     </a>
     <nav class="nav" id="nav" aria-label="Sections">
       <a href="#agenda">What's covered</a>

@@ -6,13 +6,16 @@
  * The invite is a standard calendar file (.ics), so it opens in Outlook, Yahoo, Apple,
  * Gmail and any other calendar.
  *
- * Emails are sent from the Google account that publishes ("deploys") this script.
+ * Emails are sent by the Google account that publishes ("deploys") this script. They show
+ * CONFIG.SEND_FROM as the sender once that address is set up in that account's Gmail under
+ * Settings > Accounts > "Send mail as". Until then they show the Google account's own address.
  */
 
 /* ---------- Settings: the only lines to edit ---------- */
 const CONFIG = {
   SENDER_NAME: 'Epic Cash Monthly Webinar', // name subscribers see as the sender
-  REPLY_TO: '',        // address replies should go to; empty = the sending Google account
+  SEND_FROM: 'info@epiccashnetwork.com', // address subscribers see as the sender; must be a Gmail "Send mail as" address of the sending account
+  REPLY_TO: '',        // address replies should go to; empty = the sender address
   PAGE_URL: '',        // public address of the webinar page, once it is live; empty = not mentioned
   JOIN_URL: '',        // link to the live session; empty = "the join link is on the webinar page"
   SESSIONS: 12,        // how many monthly sessions the invite covers
@@ -232,7 +235,24 @@ function sendInvite_(email, now) {
     attachments: [Utilities.newBlob(buildIcs_(next, now), 'text/calendar', 'epic-cash-monthly-webinar.ics')]
   };
   if (CONFIG.REPLY_TO) options.replyTo = CONFIG.REPLY_TO;
-  MailApp.sendEmail(options);
+
+  const from = sendFrom_();
+  if (from) {
+    // GmailApp is the only Apps Script mail service that can send as another address.
+    const gmailOptions = { from: from, htmlBody: options.htmlBody, name: options.name, attachments: options.attachments };
+    if (options.replyTo) gmailOptions.replyTo = options.replyTo;
+    GmailApp.sendEmail(options.to, options.subject, options.body, gmailOptions);
+  } else {
+    MailApp.sendEmail(options);
+  }
+}
+
+/** CONFIG.SEND_FROM if this Google account is allowed to send as it, otherwise '' (send as the account itself). */
+function sendFrom_() {
+  const wanted = String(CONFIG.SEND_FROM || '').toLowerCase();
+  if (!wanted) return '';
+  const aliases = GmailApp.getAliases().map(function (a) { return a.toLowerCase(); });
+  return aliases.indexOf(wanted) === -1 ? '' : wanted;
 }
 
 /**
@@ -242,5 +262,5 @@ function sendInvite_(email, now) {
 function testSendToMe() {
   const me = Session.getActiveUser().getEmail();
   sendInvite_(me, new Date());
-  console.log('Test invite sent to ' + me);
+  console.log('Test invite sent to ' + me + ', from ' + (sendFrom_() || me + ' (' + CONFIG.SEND_FROM + ' is not a "Send mail as" address of this account yet)'));
 }

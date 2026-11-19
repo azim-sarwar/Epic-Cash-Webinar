@@ -520,10 +520,10 @@ summary::after{transition:transform .25s}
       <h2>Add a full year of sessions to your calendar.</h2>
       <p class="muted">The invite covers the next 12 monthly sessions, one hour each. It is set to New York time, so it shows at the right hour wherever you are and adjusts itself when clocks change.</p>
       <div class="cta-row" style="margin:22px 0 34px">
-        <button class="btn btn-primary" type="button" id="icsBtn">Outlook, Apple, Yahoo and others</button>
+        <a class="btn btn-primary" id="icsBtn" href="/calendar.ics">Outlook, Apple, Yahoo and others</a>
         <a class="btn btn-ghost" id="gcalBtn" href="#save" target="_blank" rel="noopener noreferrer">Google Calendar</a>
       </div>
-      <p class="small muted" style="margin:-20px 0 30px">The first button downloads a calendar file. Open it and your calendar app adds all 12 sessions.</p>
+      <p class="small muted" style="margin:-20px 0 30px">The first button opens a calendar file. On an iPhone, tap "Add All". On a computer, open the downloaded file and your calendar app adds all 12 sessions.</p>
       <h3>Upcoming dates</h3>
       <ul class="dates" id="dates">
         <li><span>First Tuesday of every month</span><span class="muted">10:00 AM Eastern</span></li>
@@ -930,8 +930,6 @@ summary::after{transition:transform .25s}
   var desc = 'One-hour monthly live update on Epic Cash, hosted by Romain Daniellou and Jose Enrique Castellón, with Max Freeman, founder of Epic Cash, as guest: development, network and mining, ecosystem, live Q&A.' +
              (joinOk ? ' Join: ' + JOIN_URL : ' Join link: see the event page.');
   var utc = function (d) { return d.toISOString().replace(/[-:]|\.\d{3}/g, ''); };
-  var localStamp = function (s, h, min) { return '' + s.y + pad(s.m + 1) + pad(s.day) + 'T' + pad(h) + pad(min) + '00'; };
-  var endH = START_HOUR + Math.floor(DURATION_MIN / 60), endM = DURATION_MIN % 60;
 
   $('gcalBtn').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
     '&text=' + encodeURIComponent(TITLE) +
@@ -940,34 +938,13 @@ summary::after{transition:transform .25s}
     '&recur=' + encodeURIComponent(RULE) +
     '&details=' + encodeURIComponent(desc);
 
-  // Builds the calendar invite (all 12 sessions in one file) and hands it to the visitor
-  function downloadIcs() {
-    var esc = function (t) { return t.replace(/([,;\\])/g, '\\$1'); };
-    var ics = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Epic Cash Monthly Webinar//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-      'BEGIN:VTIMEZONE', 'TZID:' + TZ,
-      'BEGIN:DAYLIGHT', 'DTSTART:20070311T020000', 'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU', 'TZOFFSETFROM:-0500', 'TZOFFSETTO:-0400', 'TZNAME:EDT', 'END:DAYLIGHT',
-      'BEGIN:STANDARD', 'DTSTART:20071104T020000', 'RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU', 'TZOFFSETFROM:-0400', 'TZOFFSETTO:-0500', 'TZNAME:EST', 'END:STANDARD',
-      'END:VTIMEZONE',
-      'BEGIN:VEVENT',
-      'UID:epic-cash-monthly-update@webinar',
-      'SEQUENCE:1', // version of the invite: raised when the time moved to 10:00 AM, so calendars that already hold it update it
-      'DTSTAMP:' + utc(new Date()),
-      'DTSTART;TZID=' + TZ + ':' + localStamp(next, START_HOUR, 0),
-      'DTEND;TZID=' + TZ + ':' + localStamp(next, endH, endM),
-      RULE,
-      'SUMMARY:' + esc(TITLE),
-      'DESCRIPTION:' + esc(desc),
-      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(TITLE), 'TRIGGER:-PT30M', 'END:VALARM',
-      'END:VEVENT', 'END:VCALENDAR'
-    ].join('\r\n');
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
-    a.download = 'epic-cash-monthly-webinar.ics';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-  }
-  $('icsBtn').addEventListener('click', downloadIcs);
+  // Calendar invite (all 12 sessions in one file). It is a normal file at a normal web address (built by api/calendar.js),
+  // not something built inside the browser: iPhones ignore browser-built files in many apps. Opened this way an iPhone
+  // shows its own "Add to Calendar" screen, and other devices download the file.
+  // The settings at the top of api/calendar.js must match the ones in this file.
+  var ICS_URL = '/calendar.ics';
+  var isIphone = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function downloadIcs() { window.location.href = ICS_URL; }
 
   // Email reminder form
   var form = $('remind'), msg = $('formMsg'), busy = false;
@@ -999,7 +976,8 @@ summary::after{transition:transform .25s}
       say(text, kind);
       if (offerInvite) {
         inviteBtn.hidden = false;                  // always a button to tap, on every device
-        try { downloadIcs(); } catch (err) {}      // and start the download by itself where the browser allows it
+        // and start the download by itself, except on iPhones: there the file opens over the page, so it waits for a tap
+        if (!isIphone) { try { downloadIcs(); } catch (err) {} }
       }
     }
     // Second route, used when the reply could not be read (some phone browsers and privacy blockers stop the page
